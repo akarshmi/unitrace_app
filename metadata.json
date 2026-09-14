@@ -1,0 +1,6 @@
+{
+  "name": "UniTrace",
+  "description": "University Lost & Found platform prototype connecting to Spring Boot REST API.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
