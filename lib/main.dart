@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'api/api_client.dart';
-import 'constants.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
-import 'screens/home_screen.dart';
-import 'storage/token_storage.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+import 'app.dart';
+import 'core/core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,29 +11,16 @@ void main() async {
   };
 
   final existingToken = await TokenStorage.getAccessToken();
-  final initialRoute = (existingToken != null && existingToken.isNotEmpty) ? '/home' : '/login';
+  final existingRole = await TokenStorage.getUserRole();
+
+  String initialRoute = '/login';
+  if (existingToken != null && existingToken.isNotEmpty) {
+    if (existingRole == 'MODERATOR' || existingRole == 'ADMIN') {
+      initialRoute = '/moderator/home';
+    } else {
+      initialRoute = '/home';
+    }
+  }
 
   runApp(UniTraceApp(initialRoute: initialRoute));
-}
-
-class UniTraceApp extends StatelessWidget {
-  final String initialRoute;
-
-  const UniTraceApp({super.key, required this.initialRoute});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UniTrace',
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
-      initialRoute: initialRoute,
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegisterScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
-    );
-  }
 }
