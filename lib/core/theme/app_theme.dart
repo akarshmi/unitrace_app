@@ -68,12 +68,17 @@ class PillColors {
 @immutable
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color navyPrimary;
+  final Color navySurface;
   final Color accentAmber;
   final Color textPrimary;
   final Color textBody;
   final Color textMuted;
   final Color borderDivider;
   final Color slateSubtle;
+  final Color surfaceLight;
+  final Color backgroundLight;
+  final Color success;
+  final Color error;
 
   final PillColors statusOpen;
   final PillColors statusClosed;
@@ -85,12 +90,17 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
 
   const AppCustomColors({
     this.navyPrimary = AppColors.navyPrimary,
+    this.navySurface = AppColors.navySurface,
     this.accentAmber = AppColors.accentAmber,
     this.textPrimary = AppColors.textPrimary,
     this.textBody = AppColors.textBody,
     this.textMuted = AppColors.textMuted,
     this.borderDivider = AppColors.borderDivider,
     this.slateSubtle = AppColors.slateSubtle,
+    this.surfaceLight = AppColors.surfaceLight,
+    this.backgroundLight = AppColors.backgroundLight,
+    this.success = AppColors.success,
+    this.error = AppColors.error,
     this.statusOpen = const PillColors(
       background: AppColors.statusOpenBg,
       text: AppColors.statusOpenText,
@@ -150,12 +160,17 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   @override
   AppCustomColors copyWith({
     Color? navyPrimary,
+    Color? navySurface,
     Color? accentAmber,
     Color? textPrimary,
     Color? textBody,
     Color? textMuted,
     Color? borderDivider,
     Color? slateSubtle,
+    Color? surfaceLight,
+    Color? backgroundLight,
+    Color? success,
+    Color? error,
     PillColors? statusOpen,
     PillColors? statusClosed,
     PillColors? statusMatched,
@@ -165,12 +180,17 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   }) {
     return AppCustomColors(
       navyPrimary: navyPrimary ?? this.navyPrimary,
+      navySurface: navySurface ?? this.navySurface,
       accentAmber: accentAmber ?? this.accentAmber,
       textPrimary: textPrimary ?? this.textPrimary,
       textBody: textBody ?? this.textBody,
       textMuted: textMuted ?? this.textMuted,
       borderDivider: borderDivider ?? this.borderDivider,
       slateSubtle: slateSubtle ?? this.slateSubtle,
+      surfaceLight: surfaceLight ?? this.surfaceLight,
+      backgroundLight: backgroundLight ?? this.backgroundLight,
+      success: success ?? this.success,
+      error: error ?? this.error,
       statusOpen: statusOpen ?? this.statusOpen,
       statusClosed: statusClosed ?? this.statusClosed,
       statusMatched: statusMatched ?? this.statusMatched,
@@ -185,12 +205,17 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     if (other is! AppCustomColors) return this;
     return AppCustomColors(
       navyPrimary: Color.lerp(navyPrimary, other.navyPrimary, t)!,
+      navySurface: Color.lerp(navySurface, other.navySurface, t)!,
       accentAmber: Color.lerp(accentAmber, other.accentAmber, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textBody: Color.lerp(textBody, other.textBody, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
       borderDivider: Color.lerp(borderDivider, other.borderDivider, t)!,
       slateSubtle: Color.lerp(slateSubtle, other.slateSubtle, t)!,
+      surfaceLight: Color.lerp(surfaceLight, other.surfaceLight, t)!,
+      backgroundLight: Color.lerp(backgroundLight, other.backgroundLight, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      error: Color.lerp(error, other.error, t)!,
       statusOpen: statusOpen,
       statusClosed: statusClosed,
       statusMatched: statusMatched,
@@ -281,7 +306,7 @@ ThemeData buildAppTheme() {
       foregroundColor: AppColors.onAccentAmber, // Navy on Amber: 7.95:1 contrast
       elevation: 2,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: AppColors.surfaceLight,
       elevation: 0,
       shape: RoundedRectangleBorder(
