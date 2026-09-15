@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/core.dart';
@@ -22,7 +22,8 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   final _imagePicker = ImagePicker();
 
   late String _type;
-  File? _selectedImage;
+  XFile? _selectedImage;
+  Uint8List? _selectedImageBytes;
   bool _isSubmitting = false;
 
   @override
@@ -48,8 +49,10 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
         imageQuality: 85,
       );
       if (picked != null) {
+        final bytes = await picked.readAsBytes();
         setState(() {
-          _selectedImage = File(picked.path);
+          _selectedImage = picked;
+          _selectedImageBytes = bytes;
         });
       }
     } catch (e) {
@@ -355,12 +358,43 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                         height: 180,
                         width: double.infinity,
                         decoration: BoxDecoration(
+                          color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: customColors.borderDivider),
-                          image: DecorationImage(
-                            image: FileImage(_selectedImage!),
-                            fit: BoxFit.cover,
-                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: _selectedImageBytes != null
+                              ? Image.memory(
+                                  _selectedImageBytes!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: 180,
+                                )
+                              : FutureBuilder<Uint8List>(
+                                  future: _selectedImage!.readAsBytes(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      return Image.memory(
+                                        snapshot.data!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: 180,
+                                      );
+                                    }
+                                    if (snapshot.hasError) {
+                                      return Center(
+                                        child: Icon(Icons.broken_image_outlined, color: customColors.error),
+                                      );
+                                    }
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: customColors.navyPrimary,
+                                      ),
+                                    );
+                                  },
+                                ),
                         ),
                       ),
                       IconButton(
@@ -369,7 +403,10 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                           radius: 16,
                           child: Icon(Icons.close, size: 18, color: customColors.textPrimary),
                         ),
-                        onPressed: () => setState(() => _selectedImage = null),
+                        onPressed: () => setState(() {
+                          _selectedImage = null;
+                          _selectedImageBytes = null;
+                        }),
                       ),
                     ],
                   )

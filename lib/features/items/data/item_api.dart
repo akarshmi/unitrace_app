@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_endpoints.dart';
 import '../models/item.dart';
@@ -59,17 +59,8 @@ class ItemApi {
     String? category,
     String? eventFrom,
     String? eventTo,
-    File? imageFile,
+    XFile? imageFile,
   }) async {
-    MultipartFile? multipartFile;
-    if (imageFile != null) {
-      final fileName = imageFile.path.split('/').last;
-      multipartFile = await MultipartFile.fromFile(
-        imageFile.path,
-        filename: fileName,
-      );
-    }
-
     final formDataMap = <String, dynamic>{
       'type': type.toUpperCase(),
       'title': title,
@@ -85,11 +76,28 @@ class ItemApi {
     if (eventTo != null && eventTo.isNotEmpty) {
       formDataMap['eventTo'] = eventTo;
     }
-    if (multipartFile != null) {
-      formDataMap['image'] = multipartFile;
-    }
 
     final formData = FormData.fromMap(formDataMap);
+
+    if (imageFile != null) {
+      final bytes = await imageFile.readAsBytes();
+      var filename = imageFile.name.trim();
+      if (filename.isEmpty) {
+        filename = 'item_photo.jpg';
+      } else if (!filename.contains('.')) {
+        filename = '$filename.jpg';
+      }
+
+      formData.files.add(
+        MapEntry(
+          'image',
+          MultipartFile.fromBytes(
+            bytes,
+            filename: filename,
+          ),
+        ),
+      );
+    }
 
     final response = await _client.dio.post(
       ApiEndpoints.items,
