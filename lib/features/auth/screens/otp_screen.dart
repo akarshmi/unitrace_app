@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../core/core.dart';
 import '../data/auth_api.dart';
 
+/// Standardized OtpScreen adhering to Section 19 of UniTrace Master Design:
+/// Rules:
+/// - Step indicator (Step 02 Verification)
+/// - Clean OTP input box with clear focus state
+/// - Informative university email confirmation
+/// - Responsive card container
 class OtpScreen extends StatefulWidget {
   final String email;
   final String? token;
@@ -74,7 +80,10 @@ class _OtpScreenState extends State<OtpScreen> {
 
       final message = response['message']?.toString() ?? 'Registration successful!';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$message Please login with your credentials.')),
+        SnackBar(
+          content: Text('$message Please login with your credentials.'),
+          backgroundColor: AppColors.success,
+        ),
       );
 
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
@@ -82,7 +91,10 @@ class _OtpScreenState extends State<OtpScreen> {
       if (!mounted) return;
       final msg = e.toString().split('\n').first;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Verification failed: $msg')),
+        SnackBar(
+          content: Text('Verification failed: $msg'),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
       if (mounted) {
@@ -94,120 +106,196 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     final customColors = context.appColors;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: customColors.background,
       appBar: AppBar(
-        title: const Text('Verify Account'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        title: const Text('Account Verification'),
+        backgroundColor: customColors.surface,
         elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: customColors.navyPrimary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.md,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Step Indicator: Step 02 active
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: customColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.input),
+                      border: Border.all(color: customColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        _buildStepItem('01', 'Account', false, true, customColors),
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: customColors.success,
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                        ),
+                        _buildStepItem('02', 'Verification', true, false, customColors),
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: customColors.divider,
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                        ),
+                        _buildStepItem('03', 'Ready', false, false, customColors),
+                      ],
+                    ),
                   ),
-                  child: Icon(
-                    Icons.mark_email_read_outlined,
-                    color: customColors.navyPrimary,
-                    size: 34,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Enter Verification Code',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: customColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'We sent a temporary verification token OTP to:\n${widget.email}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: customColors.textMuted,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Valid for ${widget.otpTtlMinutes} minutes',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: customColors.accentAmber,
-                ),
-              ),
-              const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.lg),
 
-              // OTP Input
-              TextFormField(
-                controller: _otpController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  letterSpacing: 6,
-                  fontWeight: FontWeight.bold,
-                  color: customColors.textPrimary,
-                ),
-                decoration: InputDecoration(
-                  hintText: '• • • • • •',
-                  hintStyle: TextStyle(
-                    fontSize: 24,
-                    letterSpacing: 6,
-                    color: customColors.textMuted,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: customColors.borderDivider),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: customColors.navyPrimary, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: colorScheme.surface,
-                ),
-              ),
-              const SizedBox(height: 28),
+                  // Verification Card
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    decoration: BoxDecoration(
+                      color: customColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      border: Border.all(color: customColors.border),
+                      boxShadow: AppShadows.card,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: customColors.primaryLight,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.mark_email_read_outlined,
+                              color: customColors.primary,
+                              size: 26,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          'Verification Code',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.sectionTitle.copyWith(fontSize: 20),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Enter the OTP code sent to\n${widget.email}',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: customColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
 
-              // Verify Button
-              AppButton(
-                text: 'Verify & Activate Account',
-                isLoading: _isLoading,
-                onPressed: _handleVerify,
-              ),
-              const SizedBox(height: 16),
+                        // OTP Input Box (48-52px height)
+                        AppTextField(
+                          label: 'One-Time Passcode',
+                          hintText: 'e.g. 123456',
+                          controller: _otpController,
+                          keyboardType: TextInputType.number,
+                          prefixIcon: const Icon(Icons.password_outlined, size: 20),
+                          helperText: 'Valid for ${widget.otpTtlMinutes} minutes.',
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
 
-              TextButton(
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false),
-                child: Text(
-                  'Back to Login',
-                  style: TextStyle(color: customColors.navyPrimary, fontWeight: FontWeight.bold),
-                ),
+                        // Verify Button
+                        AppButton(
+                          text: 'Verify & Activate Account',
+                          isLoading: _isLoading,
+                          onPressed: _handleVerify,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Change email address',
+                        style: AppTypography.secondary.copyWith(color: customColors.primary),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStepItem(
+    String num,
+    String title,
+    bool isActive,
+    bool isCompleted,
+    AppCustomColors colors,
+  ) {
+    Color bg = isCompleted
+        ? colors.success
+        : (isActive ? colors.primary : colors.background);
+    Color border = isCompleted
+        ? colors.success
+        : (isActive ? colors.primary : colors.border);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: bg,
+            shape: BoxShape.circle,
+            border: Border.all(color: border),
+          ),
+          child: Center(
+            child: isCompleted
+                ? const Icon(Icons.check, size: 12, color: Colors.white)
+                : Text(
+                    num,
+                    style: TextStyle(
+                      fontFamily: AppTypography.fontFamily,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: isActive ? Colors.white : colors.textSecondary,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 11,
+            fontWeight: isActive || isCompleted ? FontWeight.w600 : FontWeight.w500,
+            color: isActive
+                ? colors.primary
+                : (isCompleted ? colors.success : colors.textSecondary),
+          ),
+        ),
+      ],
     );
   }
 }

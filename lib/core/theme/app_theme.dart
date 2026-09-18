@@ -1,57 +1,19 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
+import 'app_durations.dart';
+import 'app_radius.dart';
+import 'app_shadows.dart';
+import 'app_spacing.dart';
+import 'app_typography.dart';
 
-/// Single Source of Truth for UniTrace Brand Palette and Semantic Tokens.
-class AppColors {
-  AppColors._();
+export 'app_colors.dart';
+export 'app_durations.dart';
+export 'app_radius.dart';
+export 'app_shadows.dart';
+export 'app_spacing.dart';
+export 'app_typography.dart';
 
-  // Brand Core
-  static const Color navyPrimary = Color(0xFF0F172A);
-  static const Color navySurface = Color(0xFF1E293B);
-  static const Color accentAmber = Color(0xFFF59E0B);
-  static const Color amberLight = Color(0xFFFEF3C7);
-
-  // Surfaces & Backgrounds
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color backgroundLight = Color(0xFFF8FAFC);
-  static const Color slateSubtle = Color(0xFFF1F5F9);
-
-  // Typography & Content
-  static const Color textPrimary = Color(0xFF0F172A); // Dark navy for headers / high contrast
-  static const Color textBody = Color(0xFF1E293B);    // Slate 800 for readable body text
-  static const Color textMuted = Color(0xFF64748B);   // Slate 500 for secondary/hints (4.6:1 AA)
-  static const Color borderDivider = Color(0xFFE2E8F0);
-
-  // Semantics
-  static const Color success = Color(0xFF16A34A);
-  static const Color error = Color(0xFFDC2626);
-  static const Color warning = Color(0xFFF59E0B);
-
-  // Status Pill Pairings (Both background AND contrasting text color)
-  static const Color statusOpenBg = Color(0xFFDCFCE7);
-  static const Color statusOpenText = Color(0xFF166534); // Contrast 6.19:1 (AA)
-
-  static const Color statusClosedBg = Color(0xFFF1F5F9);
-  static const Color statusClosedText = Color(0xFF475569); // Contrast 7.0:1 (AA)
-
-  static const Color statusMatchedBg = Color(0xFFFEF3C7);
-  static const Color statusMatchedText = Color(0xFF92400E); // Contrast 6.64:1 (AA)
-
-  static const Color statusClaimedBg = Color(0xFFDBEAFE);
-  static const Color statusClaimedText = Color(0xFF1E40AF); // Contrast 7.52:1 (AA)
-
-  // Type Badges (LOST & FOUND)
-  static const Color typeLostBg = Color(0xFFFEE2E2);
-  static const Color typeLostText = Color(0xFFDC2626); // Contrast 4.61:1 (AA)
-
-  static const Color typeFoundBg = Color(0xFFDCFCE7);
-  static const Color typeFoundText = Color(0xFF16A34A); // Contrast 6.19:1 (AA)
-
-  // On-Containers
-  static const Color onNavyPrimary = Color(0xFFFFFFFF);
-  static const Color onAccentAmber = Color(0xFF0F172A); // High contrast navy text on amber button
-}
-
-/// Status and Type Color Model
+/// Semantic Chip / Pill Color Tokens
 class PillColors {
   final Color background;
   final Color text;
@@ -64,82 +26,176 @@ class PillColors {
   });
 }
 
-/// ThemeExtension allowing access to semantic lost & found tokens via Theme.of(context)
+/// Unified ThemeExtension delivering UniTrace master design-system tokens
 @immutable
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
+  final Color primary;
+  final Color primaryDark;
+  final Color primaryLight;
+  final Color onPrimary;
+
+  final Color background;
+  final Color surface;
+  final Color elevatedSurface;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color border;
+  final Color divider;
+
+  final Color success;
+  final Color successBg;
+  final Color warning;
+  final Color warningBg;
+  final Color error;
+  final Color errorBg;
+  final Color info;
+  final Color infoBg;
+
+  // Backward-compatibility aliases for existing widgets
   final Color navyPrimary;
   final Color navySurface;
   final Color accentAmber;
-  final Color textPrimary;
   final Color textBody;
-  final Color textMuted;
   final Color borderDivider;
   final Color slateSubtle;
   final Color surfaceLight;
   final Color backgroundLight;
-  final Color success;
-  final Color error;
 
+  // Semantic Pill Tokens
   final PillColors statusOpen;
   final PillColors statusClosed;
   final PillColors statusMatched;
   final PillColors statusClaimed;
+  final PillColors statusVerified;
+  final PillColors statusReturned;
+  final PillColors statusAwaitingSecurity;
+  final PillColors statusReceivedBySecurity;
+  final PillColors statusUnderReview;
+  final PillColors statusRejected;
 
   final PillColors typeLost;
   final PillColors typeFound;
 
   const AppCustomColors({
-    this.navyPrimary = AppColors.navyPrimary,
-    this.navySurface = AppColors.navySurface,
-    this.accentAmber = AppColors.accentAmber,
-    this.textPrimary = AppColors.textPrimary,
-    this.textBody = AppColors.textBody,
-    this.textMuted = AppColors.textMuted,
-    this.borderDivider = AppColors.borderDivider,
-    this.slateSubtle = AppColors.slateSubtle,
+    this.primary = AppColors.primary,
+    this.primaryDark = AppColors.primaryDark,
+    this.primaryLight = AppColors.primaryLight,
+    this.onPrimary = AppColors.onPrimary,
+    this.background = AppColors.backgroundLight,
+    this.surface = AppColors.surfaceLight,
+    this.elevatedSurface = AppColors.elevatedLight,
+    this.textPrimary = AppColors.textPrimaryLight,
+    this.textSecondary = AppColors.textSecondaryLight,
+    this.textMuted = AppColors.textMutedLight,
+    this.border = AppColors.borderLight,
+    this.divider = AppColors.dividerLight,
+    this.success = AppColors.success,
+    this.successBg = AppColors.successBg,
+    this.warning = AppColors.warning,
+    this.warningBg = AppColors.warningBg,
+    this.error = AppColors.error,
+    this.errorBg = AppColors.errorBg,
+    this.info = AppColors.info,
+    this.infoBg = AppColors.infoBg,
+    this.navyPrimary = AppColors.primary,
+    this.navySurface = AppColors.primaryDark,
+    this.accentAmber = AppColors.warning,
+    this.textBody = AppColors.textPrimaryLight,
+    this.borderDivider = AppColors.borderLight,
+    this.slateSubtle = const Color(0xFFF1F3F9),
     this.surfaceLight = AppColors.surfaceLight,
     this.backgroundLight = AppColors.backgroundLight,
-    this.success = AppColors.success,
-    this.error = AppColors.error,
     this.statusOpen = const PillColors(
       background: AppColors.statusOpenBg,
       text: AppColors.statusOpenText,
-      border: Color(0xFFBBF7D0),
+      border: AppColors.successBorder,
     ),
     this.statusClosed = const PillColors(
       background: AppColors.statusClosedBg,
       text: AppColors.statusClosedText,
-      border: Color(0xFFE2E8F0),
+      border: AppColors.borderLight,
     ),
     this.statusMatched = const PillColors(
       background: AppColors.statusMatchedBg,
       text: AppColors.statusMatchedText,
-      border: Color(0xFFFDE68A),
+      border: AppColors.infoBorder,
     ),
     this.statusClaimed = const PillColors(
       background: AppColors.statusClaimedBg,
       text: AppColors.statusClaimedText,
-      border: Color(0xFFBFDBFE),
+      border: AppColors.warningBorder,
+    ),
+    this.statusVerified = const PillColors(
+      background: AppColors.successBg,
+      text: AppColors.success,
+      border: AppColors.successBorder,
+    ),
+    this.statusReturned = const PillColors(
+      background: AppColors.successBg,
+      text: AppColors.success,
+      border: AppColors.successBorder,
+    ),
+    this.statusAwaitingSecurity = const PillColors(
+      background: AppColors.warningBg,
+      text: AppColors.warning,
+      border: AppColors.warningBorder,
+    ),
+    this.statusReceivedBySecurity = const PillColors(
+      background: AppColors.infoBg,
+      text: AppColors.info,
+      border: AppColors.infoBorder,
+    ),
+    this.statusUnderReview = const PillColors(
+      background: AppColors.warningBg,
+      text: AppColors.warning,
+      border: AppColors.warningBorder,
+    ),
+    this.statusRejected = const PillColors(
+      background: AppColors.errorBg,
+      text: AppColors.error,
+      border: AppColors.errorBorder,
     ),
     this.typeLost = const PillColors(
       background: AppColors.typeLostBg,
       text: AppColors.typeLostText,
-      border: Color(0xFFFECACA),
+      border: AppColors.infoBorder,
     ),
     this.typeFound = const PillColors(
       background: AppColors.typeFoundBg,
       text: AppColors.typeFoundText,
-      border: Color(0xFFBBF7D0),
+      border: AppColors.successBorder,
     ),
   });
 
   PillColors getStatusColors(String status) {
     switch (status.toUpperCase()) {
+      case 'VERIFIED':
+        return statusVerified;
+      case 'RETURNED':
+      case 'COMPLETED':
+        return statusReturned;
       case 'CLOSED':
         return statusClosed;
       case 'MATCHED':
+      case 'POTENTIAL MATCH':
+      case 'POTENTIAL_MATCH':
         return statusMatched;
+      case 'UNDER REVIEW':
+      case 'UNDER_REVIEW':
+        return statusUnderReview;
+      case 'AWAITING SECURITY':
+      case 'AWAITING_SECURITY':
+        return statusAwaitingSecurity;
+      case 'RECEIVED BY SECURITY':
+      case 'RECEIVED_BY_SECURITY':
+        return statusReceivedBySecurity;
+      case 'REJECTED':
+        return statusRejected;
       case 'CLAIMED':
+      case 'CLAIM SUBMITTED':
+      case 'CLAIM_SUBMITTED':
+      case 'PENDING':
         return statusClaimed;
       case 'OPEN':
       default:
@@ -159,42 +215,86 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
 
   @override
   AppCustomColors copyWith({
+    Color? primary,
+    Color? primaryDark,
+    Color? primaryLight,
+    Color? onPrimary,
+    Color? background,
+    Color? surface,
+    Color? elevatedSurface,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textMuted,
+    Color? border,
+    Color? divider,
+    Color? success,
+    Color? successBg,
+    Color? warning,
+    Color? warningBg,
+    Color? error,
+    Color? errorBg,
+    Color? info,
+    Color? infoBg,
     Color? navyPrimary,
     Color? navySurface,
     Color? accentAmber,
-    Color? textPrimary,
     Color? textBody,
-    Color? textMuted,
     Color? borderDivider,
     Color? slateSubtle,
     Color? surfaceLight,
     Color? backgroundLight,
-    Color? success,
-    Color? error,
     PillColors? statusOpen,
     PillColors? statusClosed,
     PillColors? statusMatched,
     PillColors? statusClaimed,
+    PillColors? statusVerified,
+    PillColors? statusReturned,
+    PillColors? statusAwaitingSecurity,
+    PillColors? statusReceivedBySecurity,
+    PillColors? statusUnderReview,
+    PillColors? statusRejected,
     PillColors? typeLost,
     PillColors? typeFound,
   }) {
     return AppCustomColors(
+      primary: primary ?? this.primary,
+      primaryDark: primaryDark ?? this.primaryDark,
+      primaryLight: primaryLight ?? this.primaryLight,
+      onPrimary: onPrimary ?? this.onPrimary,
+      background: background ?? this.background,
+      surface: surface ?? this.surface,
+      elevatedSurface: elevatedSurface ?? this.elevatedSurface,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textMuted: textMuted ?? this.textMuted,
+      border: border ?? this.border,
+      divider: divider ?? this.divider,
+      success: success ?? this.success,
+      successBg: successBg ?? this.successBg,
+      warning: warning ?? this.warning,
+      warningBg: warningBg ?? this.warningBg,
+      error: error ?? this.error,
+      errorBg: errorBg ?? this.errorBg,
+      info: info ?? this.info,
+      infoBg: infoBg ?? this.infoBg,
       navyPrimary: navyPrimary ?? this.navyPrimary,
       navySurface: navySurface ?? this.navySurface,
       accentAmber: accentAmber ?? this.accentAmber,
-      textPrimary: textPrimary ?? this.textPrimary,
       textBody: textBody ?? this.textBody,
-      textMuted: textMuted ?? this.textMuted,
       borderDivider: borderDivider ?? this.borderDivider,
       slateSubtle: slateSubtle ?? this.slateSubtle,
       surfaceLight: surfaceLight ?? this.surfaceLight,
       backgroundLight: backgroundLight ?? this.backgroundLight,
-      success: success ?? this.success,
-      error: error ?? this.error,
       statusOpen: statusOpen ?? this.statusOpen,
       statusClosed: statusClosed ?? this.statusClosed,
       statusMatched: statusMatched ?? this.statusMatched,
       statusClaimed: statusClaimed ?? this.statusClaimed,
+      statusVerified: statusVerified ?? this.statusVerified,
+      statusReturned: statusReturned ?? this.statusReturned,
+      statusAwaitingSecurity: statusAwaitingSecurity ?? this.statusAwaitingSecurity,
+      statusReceivedBySecurity: statusReceivedBySecurity ?? this.statusReceivedBySecurity,
+      statusUnderReview: statusUnderReview ?? this.statusUnderReview,
+      statusRejected: statusRejected ?? this.statusRejected,
       typeLost: typeLost ?? this.typeLost,
       typeFound: typeFound ?? this.typeFound,
     );
@@ -204,157 +304,371 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   AppCustomColors lerp(ThemeExtension<AppCustomColors>? other, double t) {
     if (other is! AppCustomColors) return this;
     return AppCustomColors(
+      primary: Color.lerp(primary, other.primary, t)!,
+      primaryDark: Color.lerp(primaryDark, other.primaryDark, t)!,
+      primaryLight: Color.lerp(primaryLight, other.primaryLight, t)!,
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
+      background: Color.lerp(background, other.background, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      elevatedSurface: Color.lerp(elevatedSurface, other.elevatedSurface, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textMuted: Color.lerp(textMuted, other.textMuted, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      divider: Color.lerp(divider, other.divider, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      successBg: Color.lerp(successBg, other.successBg, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      warningBg: Color.lerp(warningBg, other.warningBg, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      errorBg: Color.lerp(errorBg, other.errorBg, t)!,
+      info: Color.lerp(info, other.info, t)!,
+      infoBg: Color.lerp(infoBg, other.infoBg, t)!,
       navyPrimary: Color.lerp(navyPrimary, other.navyPrimary, t)!,
       navySurface: Color.lerp(navySurface, other.navySurface, t)!,
       accentAmber: Color.lerp(accentAmber, other.accentAmber, t)!,
-      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textBody: Color.lerp(textBody, other.textBody, t)!,
-      textMuted: Color.lerp(textMuted, other.textMuted, t)!,
       borderDivider: Color.lerp(borderDivider, other.borderDivider, t)!,
       slateSubtle: Color.lerp(slateSubtle, other.slateSubtle, t)!,
       surfaceLight: Color.lerp(surfaceLight, other.surfaceLight, t)!,
       backgroundLight: Color.lerp(backgroundLight, other.backgroundLight, t)!,
-      success: Color.lerp(success, other.success, t)!,
-      error: Color.lerp(error, other.error, t)!,
       statusOpen: statusOpen,
       statusClosed: statusClosed,
       statusMatched: statusMatched,
       statusClaimed: statusClaimed,
+      statusVerified: statusVerified,
+      statusReturned: statusReturned,
+      statusAwaitingSecurity: statusAwaitingSecurity,
+      statusReceivedBySecurity: statusReceivedBySecurity,
+      statusUnderReview: statusUnderReview,
+      statusRejected: statusRejected,
       typeLost: typeLost,
       typeFound: typeFound,
     );
   }
 }
 
-/// Helper extension on BuildContext to quickly access custom palette tokens
+/// Helper extension on BuildContext to access UniTrace design tokens
 extension ThemeContextExtension on BuildContext {
   AppCustomColors get appColors =>
       Theme.of(this).extension<AppCustomColors>() ?? const AppCustomColors();
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 }
 
-/// Centralized ThemeData definition
+/// Master Light Theme builder adhering to the UniTrace Design System specification
 ThemeData buildAppTheme() {
   const customColors = AppCustomColors();
 
   return ThemeData(
     useMaterial3: true,
-    fontFamily: null,
+    fontFamily: AppTypography.fontFamily,
     scaffoldBackgroundColor: AppColors.backgroundLight,
     colorScheme: const ColorScheme(
       brightness: Brightness.light,
-      primary: AppColors.navyPrimary,
-      onPrimary: AppColors.onNavyPrimary,
-      primaryContainer: AppColors.navySurface,
-      onPrimaryContainer: AppColors.onNavyPrimary,
-      secondary: AppColors.accentAmber,
-      onSecondary: AppColors.onAccentAmber,
-      secondaryContainer: AppColors.amberLight,
-      onSecondaryContainer: Color(0xFF92400E),
+      primary: AppColors.primary,
+      onPrimary: AppColors.onPrimary,
+      primaryContainer: AppColors.primaryLight,
+      onPrimaryContainer: AppColors.primaryDark,
+      secondary: AppColors.primaryDark,
+      onSecondary: Colors.white,
+      secondaryContainer: AppColors.primaryLight,
+      onSecondaryContainer: AppColors.primaryDark,
       surface: AppColors.surfaceLight,
-      onSurface: AppColors.textPrimary,
-      surfaceVariant: AppColors.slateSubtle,
-      onSurfaceVariant: AppColors.textMuted,
+      onSurface: AppColors.textPrimaryLight,
+      surfaceVariant: AppColors.backgroundLight,
+      onSurfaceVariant: AppColors.textSecondaryLight,
       background: AppColors.backgroundLight,
-      onBackground: AppColors.textPrimary,
+      onBackground: AppColors.textPrimaryLight,
       error: AppColors.error,
       onError: Colors.white,
-      outline: AppColors.borderDivider,
-      outlineVariant: Color(0xFFCBD5E1),
+      outline: AppColors.borderLight,
+      outlineVariant: AppColors.dividerLight,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.navyPrimary,
-      foregroundColor: AppColors.onNavyPrimary,
+      backgroundColor: AppColors.surfaceLight,
+      foregroundColor: AppColors.textPrimaryLight,
       elevation: 0,
-      iconTheme: IconThemeData(color: AppColors.onNavyPrimary),
-      actionsIconTheme: IconThemeData(color: AppColors.onNavyPrimary),
+      scrolledUnderElevation: 1,
+      centerTitle: false,
+      iconTheme: IconThemeData(color: AppColors.textPrimaryLight, size: 20),
+      actionsIconTheme: IconThemeData(color: AppColors.textPrimaryLight, size: 20),
       titleTextStyle: TextStyle(
-        color: AppColors.onNavyPrimary,
+        fontFamily: AppTypography.fontFamily,
+        color: AppColors.textPrimaryLight,
         fontSize: 18,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.navyPrimary,
-        foregroundColor: AppColors.onNavyPrimary,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         elevation: 0,
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: AppTypography.button,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.navyPrimary,
-        side: const BorderSide(color: AppColors.navyPrimary, width: 1.5),
+        foregroundColor: AppColors.primary,
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        side: const BorderSide(color: AppColors.borderLight, width: 1.2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+        textStyle: AppTypography.button.copyWith(color: AppColors.primary),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+        textStyle: AppTypography.button.copyWith(color: AppColors.primary),
       ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: AppColors.accentAmber,
-      foregroundColor: AppColors.onAccentAmber, // Navy on Amber: 7.95:1 contrast
-      elevation: 2,
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
     ),
     cardTheme: CardThemeData(
       color: AppColors.surfaceLight,
       elevation: 0,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.borderDivider, width: 1),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        side: const BorderSide(color: AppColors.borderLight, width: 1),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surfaceLight,
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.borderDivider),
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.borderLight, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.borderDivider),
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.borderLight, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.navyPrimary, width: 1.5),
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
-      labelStyle: const TextStyle(color: AppColors.textMuted),
-      hintStyle: const TextStyle(color: AppColors.textMuted),
-      prefixIconColor: AppColors.textMuted,
-      suffixIconColor: AppColors.textMuted,
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.error, width: 1.2),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+      ),
+      labelStyle: const TextStyle(
+        fontFamily: AppTypography.fontFamily,
+        color: AppColors.textSecondaryLight,
+        fontSize: 14,
+      ),
+      hintStyle: const TextStyle(
+        fontFamily: AppTypography.fontFamily,
+        color: AppColors.textMutedLight,
+        fontSize: 14,
+      ),
+      prefixIconColor: AppColors.textSecondaryLight,
+      suffixIconColor: AppColors.textSecondaryLight,
     ),
     textTheme: const TextTheme(
-      displayLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      displayMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      displaySmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      headlineMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      headlineSmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      titleLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-      titleMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-      titleSmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-      bodyLarge: TextStyle(color: AppColors.textBody),
-      bodyMedium: TextStyle(color: AppColors.textBody),
-      bodySmall: TextStyle(color: AppColors.textMuted),
-      labelLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+      displayLarge: AppTypography.heroDisplay,
+      displayMedium: AppTypography.pageTitle,
+      headlineLarge: AppTypography.sectionTitle,
+      headlineMedium: AppTypography.sectionTitle,
+      titleLarge: AppTypography.cardTitle,
+      titleMedium: TextStyle(
+        fontFamily: AppTypography.fontFamily,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimaryLight,
+      ),
+      titleSmall: TextStyle(
+        fontFamily: AppTypography.fontFamily,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimaryLight,
+      ),
+      bodyLarge: AppTypography.body,
+      bodyMedium: AppTypography.bodySmall,
+      bodySmall: AppTypography.secondary,
+      labelLarge: AppTypography.button,
+      labelSmall: AppTypography.caption,
     ),
     dividerTheme: const DividerThemeData(
-      color: AppColors.borderDivider,
+      color: AppColors.dividerLight,
       thickness: 1,
       space: 1,
     ),
+    chipTheme: ChipThemeData(
+      backgroundColor: AppColors.backgroundLight,
+      side: const BorderSide(color: AppColors.borderLight, width: 1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.pill)),
+      labelStyle: const TextStyle(
+        fontFamily: AppTypography.fontFamily,
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textPrimaryLight,
+      ),
+    ),
+    dialogTheme: DialogTheme(
+      backgroundColor: AppColors.surfaceLight,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.card)),
+      titleTextStyle: AppTypography.cardTitle,
+      contentTextStyle: AppTypography.bodySmall,
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: AppColors.surfaceLight,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.bottomSheet),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: AppColors.surfaceLight,
+      elevation: 0,
+      indicatorColor: AppColors.primaryLight,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      labelTextStyle: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return const TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primary,
+          );
+        }
+        return const TextStyle(
+          fontFamily: AppTypography.fontFamily,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondaryLight,
+        );
+      }),
+      iconTheme: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return const IconThemeData(color: AppColors.primary, size: 22);
+        }
+        return const IconThemeData(color: AppColors.textSecondaryLight, size: 22);
+      }),
+    ),
     extensions: const [
       customColors,
+    ],
+  );
+}
+
+/// Dark Mode theme builder
+ThemeData buildDarkAppTheme() {
+  const darkCustomColors = AppCustomColors(
+    primary: AppColors.primary,
+    primaryDark: AppColors.primaryDark,
+    primaryLight: Color(0xFF1D283A),
+    onPrimary: Colors.white,
+    background: AppColors.backgroundDark,
+    surface: AppColors.surfaceDark,
+    elevatedSurface: AppColors.elevatedDark,
+    textPrimary: AppColors.textPrimaryDark,
+    textSecondary: AppColors.textSecondaryDark,
+    textMuted: AppColors.textMutedDark,
+    border: AppColors.borderDark,
+    divider: AppColors.dividerDark,
+    success: AppColors.success,
+    successBg: Color(0xFF0E2E20),
+    warning: AppColors.warning,
+    warningBg: Color(0xFF38260B),
+    error: AppColors.error,
+    errorBg: Color(0xFF3D1616),
+    info: AppColors.info,
+    infoBg: Color(0xFF14244D),
+    navyPrimary: AppColors.primary,
+    navySurface: AppColors.surfaceDark,
+    accentAmber: AppColors.warning,
+    textBody: AppColors.textPrimaryDark,
+    borderDivider: AppColors.borderDark,
+    slateSubtle: AppColors.surfaceDark,
+    surfaceLight: AppColors.surfaceDark,
+    backgroundLight: AppColors.backgroundDark,
+    statusOpen: PillColors(
+      background: Color(0xFF0E2E20),
+      text: Color(0xFF5CE3A7),
+      border: Color(0xFF1D5A40),
+    ),
+    statusClosed: PillColors(
+      background: Color(0xFF1B2330),
+      text: AppColors.textSecondaryDark,
+      border: AppColors.borderDark,
+    ),
+    statusMatched: PillColors(
+      background: Color(0xFF14244D),
+      text: Color(0xFF7FA7FF),
+      border: Color(0xFF264082),
+    ),
+    statusClaimed: PillColors(
+      background: Color(0xFF38260B),
+      text: Color(0xFFF3C06A),
+      border: Color(0xFF6B4B18),
+    ),
+  );
+
+  return ThemeData(
+    useMaterial3: true,
+    fontFamily: AppTypography.fontFamily,
+    scaffoldBackgroundColor: AppColors.backgroundDark,
+    colorScheme: const ColorScheme(
+      brightness: Brightness.dark,
+      primary: AppColors.primary,
+      onPrimary: Colors.white,
+      primaryContainer: Color(0xFF1E2F5E),
+      onPrimaryContainer: Colors.white,
+      secondary: Color(0xFF4C70EC),
+      onSecondary: Colors.white,
+      surface: AppColors.surfaceDark,
+      onSurface: AppColors.textPrimaryDark,
+      background: AppColors.backgroundDark,
+      onBackground: AppColors.textPrimaryDark,
+      error: AppColors.error,
+      onError: Colors.white,
+      outline: AppColors.borderDark,
+      outlineVariant: AppColors.dividerDark,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.surfaceDark,
+      foregroundColor: AppColors.textPrimaryDark,
+      elevation: 0,
+      scrolledUnderElevation: 1,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        fontFamily: AppTypography.fontFamily,
+        color: AppColors.textPrimaryDark,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: AppColors.surfaceDark,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        side: const BorderSide(color: AppColors.borderDark, width: 1),
+      ),
+    ),
+    extensions: const [
+      darkCustomColors,
     ],
   );
 }

@@ -3,6 +3,13 @@ import '../../../core/core.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../data/auth_api.dart';
 
+/// Standardized LoginScreen adhering to Section 18 of UniTrace Master Design:
+/// Rules:
+/// - Calm, premium, trustworthy
+/// - Clear typography: "Find it. Verify it. Get it back."
+/// - 48-52px input fields with top labels (AppTextField)
+/// - Generous whitespace, responsive container (max 480px on web)
+/// - No unnecessary decorative cartoon clutter
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -39,14 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (tokenResponse.accessToken.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful (${tokenResponse.role})')),
-        );
-
-        // Role-based routing:
-        // MODERATOR / ADMIN -> /moderator/home
-        // STUDENT -> /home
-        if (tokenResponse.role == 'MODERATOR' || tokenResponse.role == 'ADMIN') {
+        if (tokenResponse.role == 'MODERATOR' ||
+            tokenResponse.role == 'ADMIN' ||
+            tokenResponse.role == 'SECURITY' ||
+            tokenResponse.role == 'STAFF') {
           Navigator.pushReplacementNamed(context, '/moderator/home');
         } else {
           Navigator.pushReplacementNamed(context, '/home');
@@ -60,7 +63,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       final msg = e.toString().split('\n').first;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $msg')),
+        SnackBar(
+          content: Text('Login failed: $msg'),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
       if (mounted) {
@@ -72,16 +78,15 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final customColors = context.appColors;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: customColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: customColors.navyPrimary),
+            icon: Icon(Icons.settings_outlined, color: customColors.textSecondary),
             tooltip: 'Server Settings',
             onPressed: () {
               Navigator.push(
@@ -95,168 +100,166 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Logo / Header
-                  Center(
-                    child: Container(
-                      width: 68,
-                      height: 68,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.md,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Brand Icon
+                    Center(
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: customColors.primary,
+                          borderRadius: BorderRadius.circular(AppRadius.input + 2),
+                          boxShadow: AppShadows.button,
+                        ),
+                        child: const Icon(
+                          Icons.shield_outlined,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // UniTrace Title
+                    Text(
+                      'UniTrace',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.pageTitle.copyWith(
+                        color: customColors.textPrimary,
+                        fontSize: 26,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Brand Ethos Subtitle
+                    Text(
+                      'Find it. Verify it. Get it back.',
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: customColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+
+                    // Form Card Container
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
                       decoration: BoxDecoration(
-                        color: customColors.navyPrimary,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: customColors.navyPrimary.withOpacity(0.25),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                        color: customColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        border: Border.all(color: customColors.border),
+                        boxShadow: AppShadows.card,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Sign In',
+                            style: AppTypography.sectionTitle.copyWith(fontSize: 20),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Access your campus lost & found reports',
+                            style: AppTypography.caption.copyWith(color: customColors.textSecondary),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // University Email
+                          AppTextField(
+                            label: 'University Email',
+                            hintText: 'name@university.edu',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            prefixIcon: const Icon(Icons.email_outlined, size: 20),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your university email';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Please enter a valid email address';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Password
+                          AppTextField(
+                            label: 'Password',
+                            hintText: 'Enter your password',
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Sign In Button
+                          AppButton(
+                            text: 'Sign In',
+                            isLoading: _isLoading,
+                            onPressed: _handleLogin,
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.track_changes_rounded,
-                        color: customColors.accentAmber,
-                        size: 38,
-                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'UniTrace',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                      color: customColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Campus Lost & Found Platform',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: customColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  // Email
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(color: customColors.textPrimary),
-                    decoration: InputDecoration(
-                      labelText: 'University Email',
-                      labelStyle: TextStyle(color: customColors.textMuted),
-                      hintText: 'student@uni.edu or staff@uni.edu',
-                      hintStyle: TextStyle(color: customColors.textMuted),
-                      prefixIcon: Icon(Icons.email_outlined, color: customColors.textMuted),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: customColors.borderDivider),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: customColors.borderDivider),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: customColors.navyPrimary, width: 1.5),
-                      ),
-                      filled: true,
-                      fillColor: colorScheme.surface,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your university email';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    style: TextStyle(color: customColors.textPrimary),
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(color: customColors.textMuted),
-                      prefixIcon: Icon(Icons.lock_outline, color: customColors.textMuted),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          color: customColors.textMuted,
+                    // Registration Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: AppTypography.secondary.copyWith(color: customColors.textSecondary),
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: customColors.borderDivider),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: customColors.borderDivider),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: customColors.navyPrimary, width: 1.5),
-                      ),
-                      filled: true,
-                      fillColor: colorScheme.surface,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Login Button
-                  AppButton(
-                    text: 'Login to Campus Portal',
-                    isLoading: _isLoading,
-                    onPressed: _handleLogin,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Link to Register
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "New student on campus? ",
-                        style: TextStyle(color: customColors.textMuted),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/register');
-                        },
-                        child: Text(
-                          'Register Here',
-                          style: TextStyle(
-                            color: customColors.navyPrimary,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/register');
+                          },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Create account',
+                            style: AppTypography.secondary.copyWith(
+                              color: customColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

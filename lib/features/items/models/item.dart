@@ -3,7 +3,7 @@ class Item {
   final String type; // 'LOST' or 'FOUND'
   final String title;
   final String description;
-  final String status; // 'OPEN', 'CLOSED', 'MATCHED', 'CLAIMED'
+  final String status; // 'OPEN', 'CLOSED', 'MATCHED', 'CLAIMED', 'RETURNED'
   final String location;
   final String? imageUrl;
   final String? reportedByName;
@@ -13,6 +13,8 @@ class Item {
   final String? createdAt;
   final String? eventFrom;
   final String? eventTo;
+  // Use Case 2 & 5: Custody status distinguishing FOUND_REPORTED vs RECEIVED_BY_SECURITY vs AVAILABLE_FOR_CLAIM vs HANDED_OVER
+  final String custodyStatus;
 
   Item({
     required this.id,
@@ -29,15 +31,35 @@ class Item {
     this.createdAt,
     this.eventFrom,
     this.eventTo,
+    this.custodyStatus = 'AWAITING_SECURITY',
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
+    final t = (json['type'] ?? 'LOST').toString().toUpperCase();
+    final s = (json['status'] ?? 'OPEN').toString().toUpperCase();
+
+    // Inferred custody status if not explicitly sent by backend
+    String custody = (json['custodyStatus'] ?? json['custody'] ?? '').toString().toUpperCase();
+    if (custody.isEmpty) {
+      if (t == 'FOUND') {
+        if (s == 'RETURNED' || s == 'CLOSED') {
+          custody = 'HANDED_OVER';
+        } else if (s == 'CLAIMED') {
+          custody = 'RECEIVED_BY_SECURITY';
+        } else {
+          custody = 'AWAITING_SECURITY';
+        }
+      } else {
+        custody = 'NOT_APPLICABLE';
+      }
+    }
+
     return Item(
       id: (json['id'] ?? '').toString(),
-      type: (json['type'] ?? 'LOST').toString().toUpperCase(),
+      type: t,
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      status: (json['status'] ?? 'OPEN').toString().toUpperCase(),
+      status: s,
       location: json['location']?.toString() ?? '',
       imageUrl: json['imageUrl']?.toString(),
       reportedByName: json['reportedByName']?.toString(),
@@ -47,6 +69,7 @@ class Item {
       createdAt: json['createdAt']?.toString(),
       eventFrom: json['eventFrom']?.toString(),
       eventTo: json['eventTo']?.toString(),
+      custodyStatus: custody,
     );
   }
 
@@ -65,6 +88,7 @@ class Item {
     'createdAt': createdAt,
     'eventFrom': eventFrom,
     'eventTo': eventTo,
+    'custodyStatus': custodyStatus,
   };
 
   bool get isLost => type == 'LOST';
@@ -73,4 +97,10 @@ class Item {
   bool get isClosed => status == 'CLOSED';
   bool get isMatched => status == 'MATCHED';
   bool get isClaimed => status == 'CLAIMED';
+  bool get isReturned => status == 'RETURNED';
+
+  bool get isReceivedBySecurity =>
+      custodyStatus == 'RECEIVED_BY_SECURITY' ||
+      custodyStatus == 'AVAILABLE_FOR_CLAIM' ||
+      custodyStatus == 'HANDED_OVER';
 }

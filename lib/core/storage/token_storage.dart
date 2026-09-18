@@ -11,6 +11,26 @@ class TokenStorage {
   static const _departmentKey = 'user_department';
   static const _pendingTokenKey = 'pending_verification_token';
   static const _pendingEmailKey = 'pending_verification_email';
+  static const _myCreatedItemIdsKey = 'my_created_item_ids';
+
+  static Future<void> addMyCreatedItemId(String itemId) async {
+    final existing = await getMyCreatedItemIds();
+    if (!existing.contains(itemId)) {
+      existing.add(itemId);
+      await _storage.write(key: _myCreatedItemIdsKey, value: existing.join(','));
+    }
+  }
+
+  static Future<List<String>> getMyCreatedItemIds() async {
+    final val = await _storage.read(key: _myCreatedItemIdsKey);
+    if (val == null || val.trim().isEmpty) return [];
+    return val.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  }
+
+  static Future<bool> isMyCreatedItem(String itemId) async {
+    final list = await getMyCreatedItemIds();
+    return list.contains(itemId);
+  }
 
   static Future<void> saveAccessToken(String token) async {
     await _storage.write(key: _accessTokenKey, value: token);

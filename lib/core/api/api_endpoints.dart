@@ -15,4 +15,13 @@ class ApiEndpoints {
   static const String items = '$basePrefix/items';
   static String itemById(String id) => '$basePrefix/items/$id';
   static String itemStatus(String id) => '$basePrefix/items/$id/status';
+
+  // Matches & Claims
+  static const String match = '$basePrefix/match';
+  static String matchByItemId(String itemId) => '$basePrefix/match/$itemId';
+  static const String claims = '$basePrefix/claims';
+  static String claimItem(String id) => '$basePrefix/items/$id/claim';
+
+  // Notifications
+  static const String notifications = '$basePrefix/notifications';
 }

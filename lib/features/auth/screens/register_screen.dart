@@ -3,6 +3,12 @@ import '../../../core/core.dart';
 import '../data/auth_api.dart';
 import 'otp_screen.dart';
 
+/// Standardized RegisterScreen adhering to Section 19 of UniTrace Master Design:
+/// Rules:
+/// - Step indicator: 01 Account -> 02 Verification -> 03 Complete
+/// - Clean inputs with persistent top labels (AppTextField)
+/// - Responsive card container (max 480px on web)
+/// - Consistent typography and palette
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -47,7 +53,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final regNum = int.parse(_regNumberController.text.trim());
       final uniEmail = _uniEmailController.text.trim();
 
-      // OAS 3.1: POST /api/uni/v1/auth/registration/initiation
       final response = await _authApi.registerInitiation(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
@@ -66,10 +71,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ? (response['otpTtlMinutes'] as num).toInt()
           : 10;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('OTP sent! Code expires in $ttl minutes.')),
-      );
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -84,7 +85,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
       final msg = e.toString().split('\n').first;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration initiation failed: $msg')),
+        SnackBar(
+          content: Text('Registration initiation failed: $msg'),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
       if (mounted) {
@@ -96,180 +100,235 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final customColors = context.appColors;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: customColors.background,
       appBar: AppBar(
-        title: const Text('Student Registration'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        title: const Text('Create Account'),
+        backgroundColor: customColors.surface,
         elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Join UniTrace',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: customColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Two-step verified university account creation',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: customColors.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Name Row
-                Row(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.md,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _firstNameController,
-                        decoration: _inputDecoration('First Name *', Icons.person_outline, customColors, colorScheme),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    // Step Indicator: 01 Account -> 02 Verification -> 03 Complete
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      decoration: BoxDecoration(
+                        color: customColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.input),
+                        border: Border.all(color: customColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          _buildStepItem('01', 'Account', true, customColors),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: customColors.divider,
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                          ),
+                          _buildStepItem('02', 'Verification', false, customColors),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: customColors.divider,
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                          ),
+                          _buildStepItem('03', 'Ready', false, customColors),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _lastNameController,
-                        decoration: _inputDecoration('Last Name', Icons.person_outline, customColors, colorScheme),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Main Form Card
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      decoration: BoxDecoration(
+                        color: customColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        border: Border.all(color: customColors.border),
+                        boxShadow: AppShadows.card,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Student Information',
+                            style: AppTypography.sectionTitle.copyWith(fontSize: 20),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Two-step verified university account creation',
+                            style: AppTypography.caption.copyWith(color: customColors.textSecondary),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Name Row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppTextField(
+                                  label: 'First Name *',
+                                  hintText: 'Jane',
+                                  controller: _firstNameController,
+                                  validator: (v) =>
+                                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: AppTextField(
+                                  label: 'Last Name',
+                                  hintText: 'Doe',
+                                  controller: _lastNameController,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // University Email
+                          AppTextField(
+                            label: 'University Email *',
+                            hintText: 'student@university.edu',
+                            controller: _uniEmailController,
+                            keyboardType: TextInputType.emailAddress,
+                            prefixIcon: const Icon(Icons.school_outlined, size: 20),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) return 'University email is required';
+                              if (!v.contains('@')) return 'Enter a valid email';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Registration Number & Department
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppTextField(
+                                  label: 'Reg Number *',
+                                  hintText: '102450',
+                                  controller: _regNumberController,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) return 'Required';
+                                    if (int.tryParse(v.trim()) == null) return 'Must be digits';
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: AppTextField(
+                                  label: 'Department',
+                                  hintText: 'Computer Science',
+                                  controller: _departmentController,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Phone Number
+                          AppTextField(
+                            label: 'Phone Number (10 digits) *',
+                            hintText: '1234567890',
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            prefixIcon: const Icon(Icons.phone_outlined, size: 20),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) return 'Phone number required';
+                              final cleaned = v.trim().replaceAll(RegExp(r'[^0-9]'), '');
+                              if (cleaned.length != 10) return 'Must be exactly 10 digits';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Password
+                          AppTextField(
+                            label: 'Password (8+ chars) *',
+                            hintText: 'Create a secure password',
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Password required';
+                              if (v.length < 8) return 'Password must be at least 8 characters';
+                              if (!v.contains(RegExp(r'[A-Z]'))) return 'Must contain uppercase';
+                              if (!v.contains(RegExp(r'[a-z]'))) return 'Must contain lowercase';
+                              if (!v.contains(RegExp(r'[0-9]'))) return 'Must contain a number';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          // Continue Button
+                          AppButton(
+                            text: 'Continue to Verification',
+                            isLoading: _isLoading,
+                            onPressed: _handleRegister,
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 14),
+                    const SizedBox(height: AppSpacing.lg),
 
-                // University Email
-                TextFormField(
-                  controller: _uniEmailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: _inputDecoration('University Email *', Icons.school_outlined, customColors, colorScheme, hint: 'student@university.edu'),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'University email is required';
-                    if (!v.contains('@')) return 'Enter a valid email';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
-
-                // Personal Email
-                TextFormField(
-                  controller: _personalEmailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: _inputDecoration('Personal Email (Backup)', Icons.email_outlined, customColors, colorScheme),
-                ),
-                const SizedBox(height: 14),
-
-                // Registration Number & Department
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _regNumberController,
-                        keyboardType: TextInputType.number,
-                        decoration: _inputDecoration('Reg Number *', Icons.badge_outlined, customColors, colorScheme, hint: 'e.g. 102450'),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Required';
-                          if (int.tryParse(v.trim()) == null) return 'Must be digits';
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _departmentController,
-                        decoration: _inputDecoration('Department', Icons.account_balance_outlined, customColors, colorScheme, hint: 'e.g. CS'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // Phone Number
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: _inputDecoration('Phone Number (10 digits) *', Icons.phone_outlined, customColors, colorScheme, hint: '1234567890'),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Phone number required';
-                    final cleaned = v.trim().replaceAll(RegExp(r'[^0-9]'), '');
-                    if (cleaned.length != 10) return 'Must be exactly 10 digits';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
-
-                // Password
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password (8+ chars, Upper+Lower+Digit) *',
-                    labelStyle: TextStyle(color: customColors.textMuted, fontSize: 13),
-                    prefixIcon: Icon(Icons.lock_outline, color: customColors.textMuted),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: customColors.textMuted,
-                      ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    filled: true,
-                    fillColor: colorScheme.surface,
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Password required';
-                    if (v.length < 8) return 'Password must be at least 8 characters';
-                    if (!v.contains(RegExp(r'[A-Z]'))) return 'Must contain an uppercase letter';
-                    if (!v.contains(RegExp(r'[a-z]'))) return 'Must contain a lowercase letter';
-                    if (!v.contains(RegExp(r'[0-9]'))) return 'Must contain a number';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Submit Button
-                AppButton(
-                  text: 'Initiate Registration (Get OTP)',
-                  isLoading: _isLoading,
-                  onPressed: _handleRegister,
-                ),
-                const SizedBox(height: 16),
-
-                // Back to Login
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Already registered? ', style: TextStyle(color: customColors.textMuted)),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'Log in',
-                        style: TextStyle(
-                          color: customColors.navyPrimary,
-                          fontWeight: FontWeight.bold,
+                    // Back to Login
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Already registered? ',
+                          style: AppTypography.secondary.copyWith(color: customColors.textSecondary),
                         ),
-                      ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Sign in',
+                            style: AppTypography.secondary.copyWith(
+                              color: customColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -277,22 +336,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(
-    String label,
-    IconData icon,
-    AppCustomColors customColors,
-    ColorScheme colorScheme, {
-    String? hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: customColors.textMuted, fontSize: 13),
-      hintText: hint,
-      prefixIcon: Icon(icon, color: customColors.textMuted),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      filled: true,
-      fillColor: colorScheme.surface,
-      isDense: true,
+  Widget _buildStepItem(
+    String num,
+    String title,
+    bool isActive,
+    AppCustomColors colors,
+  ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: isActive ? colors.primary : colors.background,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isActive ? colors.primary : colors.border,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              num,
+              style: TextStyle(
+                fontFamily: AppTypography.fontFamily,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: isActive ? Colors.white : colors.textSecondary,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: TextStyle(
+            fontFamily: AppTypography.fontFamily,
+            fontSize: 11,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+            color: isActive ? colors.primary : colors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
