@@ -526,7 +526,7 @@ ThemeData buildAppTheme() {
         color: AppColors.textPrimaryLight,
       ),
     ),
-    dialogTheme: DialogTheme(
+    dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surfaceLight,
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.card)),

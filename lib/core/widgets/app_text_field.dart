@@ -24,6 +24,8 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextInputAction? textInputAction;
 
+  final bool? alignLabelWithHint;
+
   const AppTextField({
     super.key,
     required this.label,
@@ -39,6 +41,7 @@ class AppTextField extends StatelessWidget {
     this.enabled = true,
     this.onChanged,
     this.textInputAction,
+    this.alignLabelWithHint,
   });
 
   @override
@@ -70,6 +73,7 @@ class AppTextField extends StatelessWidget {
           textInputAction: textInputAction,
           style: AppTypography.body.copyWith(color: customColors.textPrimary),
           decoration: InputDecoration(
+            alignLabelWithHint: alignLabelWithHint,
             hintText: hintText,
             helperText: helperText,
             helperStyle: AppTypography.caption.copyWith(color: customColors.textMuted),

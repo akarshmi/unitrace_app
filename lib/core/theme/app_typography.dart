@@ -95,6 +95,16 @@ class AppTypography {
     color: AppColors.textSecondaryLight,
   );
 
+  // Label / Subtitle (13-14px, 600)
+  static const TextStyle label = TextStyle(
+    fontFamily: fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+    height: 1.3,
+    color: AppColors.textPrimaryLight,
+  );
+
   // Button (14-15px, 600)
   static const TextStyle button = TextStyle(
     fontFamily: fontFamily,

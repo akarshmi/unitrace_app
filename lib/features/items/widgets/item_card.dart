@@ -103,9 +103,9 @@ class ItemCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          if (item.category.isNotEmpty) ...[
+                          if (item.category != null && item.category!.isNotEmpty) ...[
                             Text(
-                              item.category,
+                              item.category!,
                               style: AppTypography.caption.copyWith(
                                 color: customColors.textSecondary,
                                 fontWeight: FontWeight.w600,

@@ -340,7 +340,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             _buildInfoRow(
                               Icons.category_outlined,
                               'Category',
-                              _item.category.isNotEmpty ? _item.category : 'Uncategorized',
+                              (_item.category != null && _item.category!.isNotEmpty)
+                                  ? _item.category!
+                                  : 'Uncategorized',
                               customColors,
                             ),
                             Divider(height: AppSpacing.lg, color: customColors.divider),

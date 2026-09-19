@@ -4,6 +4,13 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/core.dart';
 import '../data/item_api.dart';
 
+/// Standardized CreateItemScreen conforming to Section 20 & 21 of UniTrace Master Design:
+/// Rules:
+/// - Clear classification toggle: [ I Lost Something ] vs [ I Found Something ]
+/// - Standardized AppTextField inputs (min 48px height, persistent top labels)
+/// - Photo attachment box with clean dashed/bordered style
+/// - Responsive card container (max 600px)
+/// - Full design token integration (context.appColors, AppTypography, AppSpacing, AppRadius)
 class CreateItemScreen extends StatefulWidget {
   final String initialType;
 
@@ -18,6 +25,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
+  final _categoryController = TextEditingController();
   final _itemApi = ItemApi();
   final _imagePicker = ImagePicker();
 
@@ -37,6 +45,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     _titleController.dispose();
     _descController.dispose();
     _locationController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -58,7 +67,10 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: $e')),
+        SnackBar(
+          content: Text('Failed to pick image: $e'),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
@@ -66,37 +78,48 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   void _showImagePickerModal(AppCustomColors customColors) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: customColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: AppRadius.bottomSheet,
       ),
       builder: (context) {
         return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: Icon(Icons.camera_alt_outlined, color: customColors.navyPrimary),
-                title: Text(
-                  'Take Photo with Camera',
-                  style: TextStyle(color: customColors.textPrimary, fontWeight: FontWeight.w600),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.camera_alt_outlined, color: customColors.primary),
+                  title: Text(
+                    'Take Photo with Camera',
+                    style: TextStyle(
+                      fontFamily: AppTypography.fontFamily,
+                      color: customColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.camera);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo_library_outlined, color: customColors.navyPrimary),
-                title: Text(
-                  'Choose from Gallery',
-                  style: TextStyle(color: customColors.textPrimary, fontWeight: FontWeight.w600),
+                ListTile(
+                  leading: Icon(Icons.photo_library_outlined, color: customColors.primary),
+                  title: Text(
+                    'Choose from Gallery',
+                    style: TextStyle(
+                      fontFamily: AppTypography.fontFamily,
+                      color: customColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(ImageSource.gallery);
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -114,18 +137,27 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
         title: _titleController.text.trim(),
         description: _descController.text.trim(),
         location: _locationController.text.trim(),
+        category: _categoryController.text.trim().isNotEmpty
+            ? _categoryController.text.trim()
+            : null,
         imageFile: _selectedImage,
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$_type item reported successfully!')),
+        SnackBar(
+          content: Text('$_type item report created successfully!'),
+          backgroundColor: AppColors.success,
+        ),
       );
-      Navigator.pop(context, true); // Pop and signal refresh
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit item: ${e.toString().split('\n').first}')),
+        SnackBar(
+          content: Text('Failed to submit item: ${e.toString().split('\n').first}'),
+          backgroundColor: AppColors.error,
+        ),
       );
     } finally {
       if (mounted) {
@@ -137,318 +169,298 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   @override
   Widget build(BuildContext context) {
     final customColors = context.appColors;
-    final colorScheme = Theme.of(context).colorScheme;
 
-    final lostSelected = _type == 'LOST';
-    final foundSelected = _type == 'FOUND';
+    final isLost = _type == 'LOST';
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: customColors.background,
       appBar: AppBar(
         title: Text(
-          'Report ${_type == 'LOST' ? 'Lost' : 'Found'} Item',
-          style: TextStyle(
-            color: colorScheme.onPrimary,
-            fontWeight: FontWeight.bold,
-          ),
+          'File ${isLost ? 'Lost Item' : 'Found Item'} Report',
+          style: AppTypography.cardTitle.copyWith(fontSize: 18),
         ),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+        backgroundColor: customColors.surface,
         elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onPrimary),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Radio/Toggle: LOST or FOUND
-                Text(
-                  'Item Classification',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: customColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.md,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: RadioListTile<String>(
-                        title: Text(
-                          'I Lost It',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: lostSelected ? customColors.typeLost.text : customColors.textPrimary,
+                    // Item Classification Toggle Cards
+                    Text(
+                      'Report Classification',
+                      style: AppTypography.label.copyWith(color: customColors.textSecondary),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildClassificationCard(
+                            title: 'I Lost It',
+                            subtitle: 'Search & request help',
+                            icon: Icons.search_rounded,
+                            isSelected: isLost,
+                            customColors: customColors,
+                            onTap: () => setState(() => _type = 'LOST'),
                           ),
                         ),
-                        value: 'LOST',
-                        groupValue: _type,
-                        activeColor: customColors.typeLost.text,
-                        tileColor: colorScheme.surface,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(
-                            color: lostSelected ? customColors.typeLost.text : customColors.borderDivider,
-                            width: lostSelected ? 1.5 : 1,
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: _buildClassificationCard(
+                            title: 'I Found It',
+                            subtitle: 'Hand in to Security',
+                            icon: Icons.inventory_2_outlined,
+                            isSelected: !isLost,
+                            customColors: customColors,
+                            onTap: () => setState(() => _type = 'FOUND'),
                           ),
                         ),
-                        onChanged: (val) {
-                          if (val != null) setState(() => _type = val);
-                        },
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: RadioListTile<String>(
-                        title: Text(
-                          'I Found It',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: foundSelected ? customColors.typeFound.text : customColors.textPrimary,
-                          ),
-                        ),
-                        value: 'FOUND',
-                        groupValue: _type,
-                        activeColor: customColors.typeFound.text,
-                        tileColor: colorScheme.surface,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(
-                            color: foundSelected ? customColors.typeFound.text : customColors.borderDivider,
-                            width: foundSelected ? 1.5 : 1,
-                          ),
-                        ),
-                        onChanged: (val) {
-                          if (val != null) setState(() => _type = val);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
+                    const SizedBox(height: AppSpacing.lg),
 
-                // Title
-                TextFormField(
-                  controller: _titleController,
-                  style: TextStyle(color: customColors.textPrimary),
-                  decoration: InputDecoration(
-                    labelText: 'Item Title',
-                    labelStyle: TextStyle(color: customColors.textMuted),
-                    hintText: 'e.g. Blue Hydro Flask, Silver MacBook Air',
-                    hintStyle: TextStyle(color: customColors.textMuted),
-                    prefixIcon: Icon(Icons.title, color: customColors.textMuted),
-                    filled: true,
-                    fillColor: colorScheme.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.borderDivider),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.borderDivider),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.navyPrimary, width: 1.5),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a title';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
-
-                // Location
-                TextFormField(
-                  controller: _locationController,
-                  style: TextStyle(color: customColors.textPrimary),
-                  decoration: InputDecoration(
-                    labelText: 'Location on Campus',
-                    labelStyle: TextStyle(color: customColors.textMuted),
-                    hintText: 'e.g. Library 2nd Floor, Room 304, Cafeteria',
-                    hintStyle: TextStyle(color: customColors.textMuted),
-                    prefixIcon: Icon(Icons.location_on_outlined, color: customColors.textMuted),
-                    filled: true,
-                    fillColor: colorScheme.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.borderDivider),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.borderDivider),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.navyPrimary, width: 1.5),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please specify the campus location';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
-
-                // Description
-                TextFormField(
-                  controller: _descController,
-                  maxLines: 3,
-                  style: TextStyle(color: customColors.textPrimary),
-                  decoration: InputDecoration(
-                    labelText: 'Description & Identifying Marks',
-                    labelStyle: TextStyle(color: customColors.textMuted),
-                    hintText: 'Provide color, brand, stickers, keychains or specific details...',
-                    hintStyle: TextStyle(color: customColors.textMuted),
-                    alignLabelWithHint: true,
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(bottom: 40),
-                      child: Icon(Icons.notes_outlined, color: customColors.textMuted),
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.borderDivider),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.borderDivider),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: customColors.navyPrimary, width: 1.5),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please provide a brief description';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Image Picker & Preview
-                Text(
-                  'Item Photo (Recommended)',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: customColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                if (_selectedImage != null)
-                  Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      Container(
-                        height: 180,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: customColors.borderDivider),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: _selectedImageBytes != null
-                              ? Image.memory(
-                                  _selectedImageBytes!,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: 180,
-                                )
-                              : FutureBuilder<Uint8List>(
-                                  future: _selectedImage!.readAsBytes(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                                      return Image.memory(
-                                        snapshot.data!,
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: 180,
-                                      );
-                                    }
-                                    if (snapshot.hasError) {
-                                      return Center(
-                                        child: Icon(Icons.broken_image_outlined, color: customColors.error),
-                                      );
-                                    }
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: customColors.navyPrimary,
-                                      ),
-                                    );
-                                  },
-                                ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: CircleAvatar(
-                          backgroundColor: customColors.surfaceLight,
-                          radius: 16,
-                          child: Icon(Icons.close, size: 18, color: customColors.textPrimary),
-                        ),
-                        onPressed: () => setState(() {
-                          _selectedImage = null;
-                          _selectedImageBytes = null;
-                        }),
-                      ),
-                    ],
-                  )
-                else
-                  InkWell(
-                    onTap: () => _showImagePickerModal(customColors),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      height: 120,
+                    // Main Form Card
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: customColors.borderDivider,
-                          style: BorderStyle.solid,
-                        ),
+                        color: customColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        border: Border.all(color: customColors.border),
+                        boxShadow: AppShadows.card,
                       ),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Icon(Icons.add_a_photo_outlined, size: 36, color: customColors.textMuted),
-                          const SizedBox(height: 8),
+                          // Item Title
+                          AppTextField(
+                            label: 'Item Title *',
+                            hintText: 'e.g. Silver 14" MacBook Pro, Blue Hydro Flask',
+                            controller: _titleController,
+                            prefixIcon: const Icon(Icons.title, size: 20),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter an item title';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Location on Campus
+                          AppTextField(
+                            label: 'Campus Location *',
+                            hintText: 'e.g. Main Library 2nd Floor, Room 304, Cafeteria',
+                            controller: _locationController,
+                            prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please specify the location on campus';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Category
+                          AppTextField(
+                            label: 'Category (Optional)',
+                            hintText: 'e.g. Electronics, Bags, Keys, IDs & Cards',
+                            controller: _categoryController,
+                            prefixIcon: const Icon(Icons.category_outlined, size: 20),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Description
+                          AppTextField(
+                            label: 'Identifying Details & Description *',
+                            hintText:
+                                'Specify color, brand, stickers, serials, keychains, or unique marks...',
+                            controller: _descController,
+                            maxLines: 4,
+                            alignLabelWithHint: true,
+                            prefixIcon: const Icon(Icons.notes_outlined, size: 20),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please provide distinguishing details';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Photo Attachment Box
                           Text(
-                            'Attach Camera or Gallery Photo',
-                            style: TextStyle(
-                              color: customColors.textMuted,
-                              fontWeight: FontWeight.w500,
+                            'Item Photo (Recommended)',
+                            style: AppTypography.label.copyWith(color: customColors.textSecondary),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+
+                          if (_selectedImage != null)
+                            Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                Container(
+                                  height: 180,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: customColors.surface,
+                                    borderRadius: BorderRadius.circular(AppRadius.input),
+                                    border: Border.all(color: customColors.border),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(AppRadius.input),
+                                    child: _selectedImageBytes != null
+                                        ? Image.memory(
+                                            _selectedImageBytes!,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: 180,
+                                          )
+                                        : const Center(
+                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                          ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: CircleAvatar(
+                                    backgroundColor: customColors.surface,
+                                    radius: 16,
+                                    child: Icon(Icons.close, size: 16, color: customColors.textPrimary),
+                                  ),
+                                  onPressed: () => setState(() {
+                                    _selectedImage = null;
+                                    _selectedImageBytes = null;
+                                  }),
+                                ),
+                              ],
+                            )
+                          else
+                            InkWell(
+                              onTap: () => _showImagePickerModal(customColors),
+                              borderRadius: BorderRadius.circular(AppRadius.input),
+                              child: Container(
+                                height: 110,
+                                decoration: BoxDecoration(
+                                  color: customColors.background,
+                                  borderRadius: BorderRadius.circular(AppRadius.input),
+                                  border: Border.all(
+                                    color: customColors.border,
+                                    width: 1.2,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_a_photo_outlined,
+                                      size: 32,
+                                      color: customColors.primary,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Attach photo from camera or gallery',
+                                      style: AppTypography.secondary.copyWith(
+                                        color: customColors.textSecondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
+                          const SizedBox(height: AppSpacing.xl),
+
+                          // Submit Action Button
+                          AppButton(
+                            text: 'Submit ${isLost ? 'Lost Item' : 'Found Item'} Report',
+                            isLoading: _isSubmitting,
+                            icon: Icons.send_rounded,
+                            onPressed: _handleSubmit,
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClassificationCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required AppCustomColors customColors,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected ? customColors.primaryLight : customColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(
+          color: isSelected ? customColors.primary : customColors.border,
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: isSelected ? customColors.primary : customColors.background,
+                    shape: BoxShape.circle,
                   ),
-
-                const SizedBox(height: 28),
-
-                // Submit Button
-                AppButton(
-                  text: 'Submit $_type Report',
-                  isLoading: _isSubmitting,
-                  icon: Icons.send_rounded,
-                  onPressed: _handleSubmit,
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: isSelected ? Colors.white : customColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontFamily: AppTypography.fontFamily,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? customColors.primary : customColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: AppTypography.caption.copyWith(
+                          color: isSelected ? customColors.primary : customColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

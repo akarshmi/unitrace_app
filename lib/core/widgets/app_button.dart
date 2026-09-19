@@ -8,6 +8,8 @@ enum AppButtonVariant {
   danger,
 }
 
+typedef ButtonVariant = AppButtonVariant;
+
 /// Standardized AppButton adhering to the UniTrace Design System.
 /// Master prompt specifications:
 /// - Primary: Filled primary color (#3157D5)
